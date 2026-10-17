@@ -1,0 +1,218 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:,"><title>Total Income Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--line:#262626;--gold:#e8b923;--txt:#f5f5f5;--muted:#a3a3a3;--red:#ff2d3a;--green:#22c55e;--surf:#141414;--surf2:#1c1c1c;--gb:#e8b92347}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 500px at 50% -200px,#e8b9231a,transparent),var(--bg);color:var(--txt);font:14px Inter,system-ui,sans-serif}
+h1,h2{font-family:Oswald,sans-serif;margin:0;color:var(--gold);text-transform:uppercase}h1{letter-spacing:.08em}
+h2{font-size:18px;margin:28px 0 10px;letter-spacing:.1em;font-weight:600;border-left:3px solid var(--gold);padding-left:10px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+.top{background:linear-gradient(180deg,#0c0c0c,#050505);border-bottom:1px solid var(--gb);box-shadow:0 12px 40px #0000008c;position:relative;padding:18px 0}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#e8b923,transparent)}
+.muted{color:var(--muted);font-size:12px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.pill{background:var(--surf2);color:#d4d4d4;border:1px solid var(--line);border-radius:999px;padding:7px 16px;font:600 13px Inter,system-ui;cursor:pointer;transition:all .15s}
+.pill:hover{border-color:var(--gold);box-shadow:0 0 18px #e8b92355;transform:translateY(-1px)}
+.pill.on{background:linear-gradient(180deg,#f5c518,#e8b923);color:#050505;border-color:#e8b923;box-shadow:0 0 18px #e8b923d9,0 4px 12px #00000080}
+@media(max-width:600px){.pill{padding:6px 12px;font-size:12px}}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.card,.chartbox,#gate form{background:linear-gradient(180deg,#1c1c1c,#141414);border:1px solid var(--gb);border-radius:1rem;padding:14px;transition:transform .2s,box-shadow .2s}
+.card:hover,.chartbox:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 14px 36px #00000073,0 0 0 1px #e8b923}
+.card .l{font:700 11px Inter;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.card .v{font:700 26px Oswald;margin-top:4px}.card.hero .v{font-size:34px}
+.card .s{font-size:12px;color:var(--muted);margin-top:4px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+table{width:100%;border-collapse:collapse;background:var(--surf);border:1px solid var(--gb);border-radius:1rem;overflow:hidden;color:var(--txt)}
+th,td{padding:7px 10px;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}
+th{background:#0c0c0c;color:var(--gold);text-transform:uppercase;font:600 11px Inter;letter-spacing:.12em;border-bottom:1px solid var(--gold)}
+td{border-bottom:1px solid #202020}tr:nth-child(even) td{background:#0c0c0c66}tr:hover td{background:#e8b92314}tr.ft td{font-weight:700;background:#0c0c0c;border-top:1px solid var(--gb)}
+tr.dim td{color:var(--muted)}th.t,td.t{text-align:left!important}
+.scroll{overflow-x:auto}.neg{color:var(--red)!important}.pos{color:var(--green)!important}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.chartbox svg{width:100%;height:auto;display:block}.chartbox text{fill:#a3a3a3;font:11px Inter}
+.lg{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px;vertical-align:middle}
+#gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:9}
+#gate form{padding:28px;text-align:center}
+#gate input{font:18px Inter;padding:8px 12px;border:1px solid var(--gb);border-radius:8px;width:180px;text-align:center;background:#0c0c0c;color:var(--txt)}
+#gate button{margin-left:6px;font:700 15px Inter;padding:9px 16px;border:0;border-radius:999px;background:var(--gold);color:#050505;cursor:pointer}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.fx-in{opacity:0;animation:up .6s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shim{background:linear-gradient(90deg,#f5c518 0%,#fff3b0 45%,#e8b923 55%,#f5c518 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shim 3.5s linear infinite}
+.shim.neg{background:none;-webkit-text-fill-color:var(--red);animation:none}
+.bar{height:6px;background:#262626;border-radius:9px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;width:0;border-radius:9px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.chartbox rect{transition:y .9s cubic-bezier(.2,.8,.2,1),height .9s cubic-bezier(.2,.8,.2,1)}
+@media(prefers-reduced-motion:reduce){.fx-in{animation:none;opacity:1}.shim{animation:none}.bar i,.chartbox rect{transition:none}.card:hover,.chartbox:hover,.pill:hover{transform:none}}
+</style></head><body>
+<div id="gate"><form onsubmit="go(event)"><h1>Total Income Tracker</h1><p class="muted">Enter password</p><input id="pw" type="password" autofocus><button>Open</button><div id="err" class="neg"></div></form></div>
+<div class="top"><div class="wrap"><h1>Total Income Tracker</h1><div class="muted">Ryan Sci · Syndications · Commissions · Trading · <span id="gen"></span></div></div></div>
+<div class="wrap" id="app" style="display:none">
+<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><button class="pill" data-t="Y">By Year</button><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndications</button><button class="pill" data-t="comm">Commissions</button><button class="pill" data-t="trading">Trading</button></div>
+<section data-s="O"><div class="cards" id="hero"></div><h2>By Stream</h2><div class="cards" id="scards"></div>
+<div class="grid2"><div><h2>Income by Year</h2><div class="chartbox" id="cYear"></div></div><div><h2 id="hMon">Monthly</h2><div class="chartbox" id="cMon"></div></div></div>
+<h2>Summary</h2><div class="scroll" id="tOv"></div></section>
+<section data-s="M"><h2>Income by Month</h2><div class="pills yrs" id="yM"></div><div class="chartbox" id="cM"></div><div class="scroll" style="margin-top:12px" id="tM"></div></section>
+<section data-s="Y"><h2>Income by Year</h2><div class="chartbox" id="cY"></div><div class="scroll" style="margin-top:12px" id="tY"></div></section>
+<section data-s="S"><div class="cards" id="stCards"></div><h2>By Year</h2><div class="scroll" id="tSY"></div><h2 id="hSM">By Month</h2><div class="pills yrs" id="ySM"></div><div class="scroll" id="tSM"></div><div id="extra"></div></section>
+<br></div>
+<script>
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decrypt(pw){const e=await (await fetch('data.enc.json',{cache:'no-store'})).json();
+ const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+ const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(e.salt),iterations:e.iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+ return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},key,b64(e.ct))));}
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','No month'];
+const COL={ryansci:'#38bdf8',synd:'#e8b923',comm:'#a78bfa',trading:'#f97316'};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const r2=v=>Math.round(v*100)/100;
+const $=v=>v==null||!isFinite(v)?'—':(v<0?'-':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const $k=v=>(v<0?'-':'')+'$'+(Math.abs(v)>=1e6?(Math.abs(v)/1e6).toFixed(2)+'M':Math.abs(v)>=1e3?(Math.abs(v)/1e3).toFixed(0)+'K':Math.abs(v).toFixed(0));
+const sg=v=>v==null?'':v>0?'pos':v<0?'neg':'';
+const M=v=>({v:$(v),c:sg(v),d:v});
+const cell=c=>{if(c&&typeof c=='object')return `<td class="${c.c||''}"${c.d!=null&&isFinite(c.d)?` data-v="${c.d}"`:''}>${c.v}</td>`;return `<td>${c??''}</td>`};
+function tbl(id,h,rows,foot,rc){const tx=h.map((_,j)=>rows.length&&rows.every(r=>!(r[j]&&typeof r[j]=='object')));const ce=(c,j)=>tx[j]?`<td class="t">${c??''}</td>`:cell(c);document.getElementById(id).innerHTML='<table><thead><tr>'+h.map((x,j)=>`<th class="${tx[j]?'t':''}">${x}</th>`).join('')+'</tr></thead><tbody>'+rows.map((r,i)=>`<tr class="${rc?rc(i):''}">`+r.map(ce).join('')+'</tr>').join('')+'</tbody>'+(foot?'<tfoot><tr class="ft">'+foot.map(ce).join('')+'</tr></tfoot>':'')+'</table>';}
+const sum=a=>r2(a.reduce((x,y)=>x+(y||0),0));
+let D,tab,yrM,yrS;
+const NM=()=>Object.fromEntries(D.streams);const SK=()=>D.streams.map(s=>s[0]);
+/* stacked bar chart: groups=[{label, vals:{key:val}}], keys, colors */
+function stacked(id,groups,keys,colors,names){const W=900,Hh=280,P=46;let mx=0,mn=0;
+ groups.forEach(g=>{let p=0,n=0;keys.forEach(k=>{const v=g.vals[k]||0;v>0?p+=v:n+=v});g.p=p;g.n=n;mx=Math.max(mx,p);mn=Math.min(mn,n)});
+ if(mx===mn)mx=1;const rng=mx-mn,s=(Hh-50)/rng,z=26+mx*s,bw=Math.min(60,(W-P-20)/groups.length*0.6),step=(W-P-20)/groups.length;
+ let g=`<line x1="${P}" x2="${W}" y1="${z}" y2="${z}" stroke="#525252"/>`;
+ [mx,mx/2,0,mn].filter((v,i,a)=>a.indexOf(v)==i&&(v!==0||true)).forEach(v=>{const y=z-v*s;g+=`<text x="${P-6}" y="${y+4}" text-anchor="end">${$k(v)}</text><line x1="${P}" x2="${W}" y1="${y}" y2="${y}" stroke="#1f1f1f"/>`});
+ groups.forEach((gr,i)=>{const x=P+10+i*step+(step-bw)/2;let up=z,dn=z;
+  keys.forEach(k=>{const v=gr.vals[k]||0;if(!v)return;const h=Math.abs(v)*s;let y;if(v>0){up-=h;y=up}else{y=dn;dn+=h}
+   g+=`<rect x="${x}" width="${bw}" y="${z}" height="0" data-y="${y}" data-h="${h}" fill="${colors[k]}" rx="2"><title>${gr.label} · ${names[k]}: ${$(v)}</title></rect>`});
+  const t=r2(gr.p+gr.n);g+=`<text x="${x+bw/2}" y="${Hh+12}" text-anchor="middle">${gr.label}</text><text x="${x+bw/2}" y="${Math.min(up,z)-5}" text-anchor="middle" style="fill:${t<0?'#ff2d3a':'#f5f5f5'};font-weight:700">${(gr.p||gr.n)?$k(t):''}</text>`});
+ document.getElementById(id).innerHTML=`<div class="muted">${keys.map(k=>`<span class="lg" style="background:${colors[k]}"></span>${names[k]}`).join('')}</div><svg viewBox="0 0 ${W} ${Hh+20}">${g}</svg>`;
+ setTimeout(()=>document.querySelectorAll('#'+id+' rect').forEach(r=>{r.setAttribute('y',r.dataset.y);r.setAttribute('height',r.dataset.h)}),RM?0:250);}
+function yearPills(id,cur,years){document.getElementById(id).innerHTML=years.map(y=>`<button class="pill ${y==cur?'on':''}" data-y="${y}">${y}</button>`).join('');}
+function monthsFor(grid){return grid.map((g,i)=>({i,g})).filter(o=>Object.values(o.g).some(v=>v!=null))}
+function card(l,v,s,extra,hero){return `<div class="card${hero?' hero':''}"><div class="l">${l}</div><div class="v ${sg(v)}">${$(v)}</div>${s?`<div class="s">${s}</div>`:''}${extra||''}</div>`}
+function bar(p,c){return `<div class="bar"><i data-w="${Math.max(0,Math.min(100,p))}" style="background:${c}"></i></div>`}
+function overview(){const nm=NM(),ks=SK(),y=D.ytd,tY=D.totYear[y];
+ const prin=D.comp.synd['Principal returned'];
+ document.getElementById('hero').innerHTML=card(`Total income ${y} YTD`,tY,`${D.years[0]}–${y} all-time: ${$(D.totAll)}`,'',1)+card('All-time total income',D.totAll,'All four streams combined','',1)+card(`Return of principal ${y} (not income)`,prin.year[y],'Syndications · all-time '+$(sum(Object.values(prin.year))));
+ const pos=ks.reduce((a,k)=>a+Math.max(0,D.byYear[k][y]||0),0);
+ document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${y} YTD`,D.byYear[k][y],'All-time '+`<span class="${sg(D.allTime[k])}">${$(D.allTime[k])}</span>`,bar(pos?Math.max(0,D.byYear[k][y]||0)/pos*100:0,COL[k]))).join('');
+ const yy=['2024','2025',y].filter((v,i,a)=>a.indexOf(v)==i&&D.years.includes(v));
+ stacked('cYear',yy.map(Y=>({label:Y+(Y==y?' YTD':''),vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][Y]]))})),ks,COL,nm);
+ document.getElementById('hMon').textContent=`Monthly ${y}`;
+ stacked('cMon',D.mgrid[y].map((g,i)=>({label:i<12?MO[i]:'No mo.',vals:g})).filter((o,i)=>i<12||Object.values(o.vals).some(v=>v)),ks,COL,nm);
+ tbl('tOv',['Stream','2024','2025',y+' YTD','All-time','Share of all-time'],ks.map(k=>[`<span class="dot" style="background:${COL[k]}"></span>${nm[k]}`,M(D.byYear[k]['2024']),M(D.byYear[k]['2025']),M(D.byYear[k][y]),M(D.allTime[k]),{v:(D.allTime[k]/D.totAll*100).toFixed(1)+'%',d:D.allTime[k]/D.totAll*100,c:sg(D.allTime[k])}]),['TOTAL',M(D.totYear['2024']),M(D.totYear['2025']),M(tY),M(D.totAll),'100.0%']);}
+function byMonth(){const nm=NM(),ks=SK(),yrs=D.years.filter(Y=>monthsFor(D.mgrid[Y]).length);if(!yrs.includes(yrM))yrM=D.ytd;yearPills('yM',yrM,yrs);
+ const g=D.mgrid[yrM],rows=monthsFor(g);
+ stacked('cM',rows.map(o=>({label:o.i<12?MO[o.i]:'No mo.',vals:o.g})),ks,COL,nm);
+ tbl('tM',['Month',...ks.map(k=>nm[k]),'Total'],rows.map(o=>[{v:o.i<12?MO[o.i]+' '+yrM:'No month',d:o.i<12?null:null},...ks.map(k=>M(o.g[k])),M(sum(ks.map(k=>o.g[k])))]),['TOTAL '+yrM,...ks.map(k=>M(D.byYear[k][yrM])),M(D.totYear[yrM])]);
+ document.querySelectorAll('#tM tbody tr').forEach((r,i)=>{if(rows[i].i<12)r.cells[0].dataset.v=new Date(Date.UTC(+yrM,rows[i].i,1)).getTime();else r.cells[0].dataset.v=Date.UTC(+yrM,12,1)})}
+function byYear(){const nm=NM(),ks=SK();
+ stacked('cY',D.years.map(Y=>({label:Y,vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][Y]]))})),ks,COL,nm);
+ const rows=D.years.map(Y=>[Y+(Y==D.ytd?' YTD':''),...ks.map(k=>M(D.byYear[k][Y])),M(D.totYear[Y])]);
+ if(ks.some(k=>D.undated[k]!=null))rows.push(['Undated',...ks.map(k=>M(D.undated[k])),M(sum(ks.map(k=>D.undated[k])))]);
+ tbl('tY',['Year',...ks.map(k=>nm[k]),'Total'],rows,['ALL-TIME',...ks.map(k=>M(D.allTime[k])),M(D.totAll)]);}
+function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=D.ytd,inc=cs.filter(c=>C[c].counted),ex=cs.filter(c=>!C[c].counted);
+ const allc=c=>sum([...Object.values(C[c].year),C[c].undated]);
+ document.getElementById('stCards').innerHTML=card(`${nm[k]} income ${y} YTD`,D.byYear[k][y],'',bar(100,COL[k]),1)+card(`${nm[k]} all-time income`,D.allTime[k],'','',1)+inc.concat(ex).map(c=>card(c+(C[c].counted?'':' (not income)')+` · ${y}`,C[c].year[y],'All-time '+$(allc(c)))).join('');
+ const yrs=D.years.filter(Y=>cs.some(c=>C[c].year[Y]!=null));
+ const hdr=['Year',...inc,...(inc.length>1?['Income total']:[]),...ex.map(c=>c+' (not income)')];
+ const row=(lab,get)=>[lab,...inc.map(c=>M(get(c))),...(inc.length>1?[M(inc.every(c=>get(c)==null)?null:sum(inc.map(get)))]:[]),...ex.map(c=>M(get(c)))];
+ const rows=yrs.map(Y=>row(Y+(Y==y?' YTD':''),c=>C[c].year[Y]));
+ if(cs.some(c=>C[c].undated!=null))rows.push(row('Undated',c=>C[c].undated));
+ tbl('tSY',hdr,rows,row('ALL-TIME',allc));
+ const CM=D.cmonth[k],myrs=D.years.filter(Y=>CM[Y]&&CM[Y].slice(0,12).some(g=>Object.values(g).some(v=>v!=null)));
+ document.getElementById('hSM').style.display=document.getElementById('ySM').style.display=document.getElementById('tSM').style.display=myrs.length?'':'none';
+ if(myrs.length){if(!myrs.includes(yrS))yrS=myrs.includes(y)?y:myrs[myrs.length-1];yearPills('ySM',yrS,myrs);
+  const g=CM[yrS],mr=g.map((x,i)=>({i,x})).filter(o=>Object.values(o.x).some(v=>v!=null));
+  tbl('tSM',['Month',...inc,...(inc.length>1?['Income total']:[]),...ex.map(c=>c+' (not income)')],mr.map(o=>row(o.i<12?MO[o.i]+' '+yrS:'No month',c=>o.x[c])),row('TOTAL '+yrS,c=>C[c].year[yrS]));
+  document.querySelectorAll('#tSM tbody tr').forEach((r,i)=>r.cells[0].dataset.v=Date.UTC(+yrS,mr[i].i,1));}
+ let ex2='';
+ if(k=='synd'){ex2='<h2>By Position</h2><div class="scroll" id="tX1"></div>'}
+ if(k=='comm'){ex2='<h2>Commission Deals</h2><div class="scroll" id="tX1"></div><h2>BVG B-share Commissions (non-cash, not income)</h2><div class="scroll" id="tX2"></div>'}
+ document.getElementById('extra').innerHTML=ex2;
+ if(k=='synd'){const P=D.synPos;tbl('tX1',['Sponsor','Position','Contributed','Pref income','Profit','Total income','Principal returned (not income)'],P.map(r=>[r[0],r[1],M(r[2]),M(r[3]),M(r[4]),M(r[5]),M(r[6])]),['TOTAL','',M(sum(P.map(r=>r[2]))),M(sum(P.map(r=>r[3]))),M(sum(P.map(r=>r[4]))),M(sum(P.map(r=>r[5]))),M(sum(P.map(r=>r[6])))])}
+ if(k=='comm'){const P=D.comm;tbl('tX1',['Type','Deal','Year','Close date','Gross / raise','Commission'],P.map(r=>[r[0],r[1],r[2],r[3]||'—',M(r[4]),M(r[5])]),['TOTAL','','','',M(sum(P.map(r=>r[4]))),M(sum(P.map(r=>r[5])))]);
+  const B=D.bshare;tbl('tX2',['Offering','Year','Raise','B-share commission'],B.map(r=>[r[0],r[1],{v:$(r[2]),d:r[2]},{v:$(r[3]),d:r[3]}]),['TOTAL','',{v:$(sum(B.map(r=>r[2])))},{v:$(sum(B.map(r=>r[3])))}])}}
+function countUp(el){const t=el.textContent.trim();const m=t.match(/^(-?\$?)([\d,]+(?:\.\d+)?)(%|x)?$/);if(!m||RM)return;const fin=parseFloat(m[2].replace(/,/g,''));const dec=(m[2].split('.')[1]||'').length;const fmt=v=>m[1]+v.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec})+(m[3]||'');
+ const t0=performance.now();el.textContent=fmt(0);(function f(n){const p=Math.min(1,(n-t0)/1200),e=1-Math.pow(1-p,3);el.textContent=p<1?fmt(fin*e):t;if(p<1)requestAnimationFrame(f)})(t0);}
+function fx(){const vis=[...document.querySelectorAll('#app section')].filter(s=>s.style.display!='none');
+ vis.forEach(s=>s.querySelectorAll('h2,.scroll,.card,.chartbox').forEach((e,i)=>{e.classList.remove('fx-in');void e.offsetWidth;e.classList.add('fx-in');e.style.animationDelay=Math.min(i*45,1400)+'ms'}));
+ vis.forEach(s=>s.querySelectorAll('.card.hero .v').forEach(e=>e.classList.add('shim')));
+ vis.forEach(s=>s.querySelectorAll('td:not(.t),.card .v').forEach(e=>{if(e.children.length==0)countUp(e)}));
+ setTimeout(()=>document.querySelectorAll('.bar i').forEach(i=>i.style.width=i.dataset.w+'%'),RM?0:300);}
+function view(t){tab=t;localStorage.titab=t;document.querySelectorAll('#tabs .pill').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ const s=['O','M','Y'].includes(t)?t:'S';document.querySelectorAll('section[data-s]').forEach(x=>x.style.display=x.dataset.s===s?'':'none');
+ if(t=='O')overview();else if(t=='M')byMonth();else if(t=='Y')byYear();else stream(t);fx();}
+document.addEventListener('click',e=>{const b=e.target.closest('#tabs .pill');if(b)view(b.dataset.t);
+ const y=e.target.closest('#yM .pill');if(y){yrM=localStorage.tiyrM=y.dataset.y;byMonth();fx()}
+ const z=e.target.closest('#ySM .pill');if(z){yrS=z.dataset.y;stream(tab);fx()}});
+async function go(e){e.preventDefault();try{const pw=document.getElementById('pw').value;D=await decrypt(pw);sessionStorage.tipw=pw;}catch(x){document.getElementById('err').textContent='Wrong password';return;}
+ document.getElementById('gate').remove();document.getElementById('app').style.display='';document.getElementById('gen').textContent='Updated '+D.generated;
+ yrM=localStorage.tiyrM||D.ytd;let t=localStorage.titab||'O';if(!document.querySelector(`#tabs [data-t="${t}"]`))t='O';view(t);}
+if(sessionStorage.tipw){document.getElementById('pw').value=sessionStorage.tipw;go(new Event('submit'));}
+</script><!--SORTABLE-START--><script>
+/* Shared sortable tables (Grok Bot trackers). Click any header: asc/desc toggle with ▲/▼.
+   Works on dynamically rendered tables via event delegation. Totals (tfoot, .total/.ft/.tot rows,
+   or first cell TOTAL/ALL-TIME/GRAND) stay pinned at bottom. Group-label rows (fewer cells / colspan)
+   keep their members: sorting happens within each group. Uses td[data-v] when present.
+   Skip: th with own onclick, th.nosort, or table[data-nosort]. */
+(function(){
+  if(window.__sortableShared)return;window.__sortableShared=1;
+  var st=document.createElement('style');
+  st.textContent='table:not([data-nosort]) th:not(.nosort){cursor:pointer;user-select:none}th .srt-ar{font-size:.8em;opacity:.85;margin-left:3px}';
+  (document.head||document.documentElement).appendChild(st);
+  var MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  function key(cell){
+    if(!cell)return null;
+    var raw=cell.dataset&&cell.dataset.v!=null?cell.dataset.v:cell.textContent;
+    var s=String(raw).replace(/[▲▼]/g,'').trim();
+    if(!s||s==='—'||s==='-'||s==='–'||/^n\/?a$/i.test(s))return null;
+    var m;
+    if((m=s.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/)))return {n:Date.UTC(+m[1],+m[2]-1,+(m[3]||1))};
+    if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/))){var y=+m[3];if(y<100)y+=2000;return {n:Date.UTC(y,+m[1]-1,+m[2])};}
+    if((m=s.match(/^([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})$/))&&MON[m[1].toLowerCase()])return {n:Date.UTC(+m[3],MON[m[1].toLowerCase()]-1,+m[2])};
+    if((m=s.match(/^([A-Za-z]{3})[a-z]* (\d{4})$/))&&MON[m[1].toLowerCase()])return {n:Date.UTC(+m[2],MON[m[1].toLowerCase()]-1,1)};
+    if((m=s.match(/^Q([1-4]) (\d{4})$/i)))return {n:Date.UTC(+m[2],(+m[1]-1)*3,1)};
+    var t=s.replace(/[$,%x×\s]|USD/gi,'').replace(/^\+/,'').replace(/[−–]/g,'-');
+    var neg=/^\(.*\)$/.test(t);if(neg)t=t.slice(1,-1);
+    var mult=1;if((m=t.match(/^(-?[\d.]+)([KMB])$/i))){t=m[1];mult={k:1e3,m:1e6,b:1e9}[m[2].toLowerCase()];}
+    if(/^-?\d*\.?\d+$/.test(t))return {n:parseFloat(t)*mult*(neg?-1:1)};
+    return {s:s.toLowerCase()};
+  }
+  function pinned(r){
+    if(r.parentElement&&r.parentElement.tagName==='TFOOT')return true;
+    if(/(^|\s)(total|totals|ft|tot|sum|grand|pinned)(\s|$)/i.test(r.className))return true;
+    var c=r.cells[0];return !!c&&/^\s*(TOTAL|TOTALS|ALL-TIME|GRAND TOTAL)\b/i.test(c.textContent);
+  }
+  document.addEventListener('click',function(e){
+    var th=e.target.closest&&e.target.closest('th');if(!th||th.onclick||th.classList.contains('nosort'))return;
+    var tb=th.closest('table');if(!tb||tb.hasAttribute('data-nosort'))return;
+    var hr=th.parentElement;if(hr.parentElement.tagName==='TFOOT')return;
+    var ci=0;for(var k=0;k<hr.cells.length&&hr.cells[k]!==th;k++)ci+=hr.cells[k].colSpan||1;
+    var ncol=0;for(k=0;k<hr.cells.length;k++)ncol+=hr.cells[k].colSpan||1;
+    var dir=th.dataset.sdir==='asc'?'desc':'asc',m=dir==='asc'?1:-1;
+    tb.querySelectorAll('th').forEach(function(x){delete x.dataset.sdir;var a=x.querySelector('.srt-ar');if(a)a.remove();});
+    th.dataset.sdir=dir;var ar=document.createElement('span');ar.className='srt-ar';ar.textContent=dir==='asc'?'▲':'▼';th.appendChild(ar);
+    var bodies=tb.tBodies.length?[].slice.call(tb.tBodies):[tb];
+    bodies.forEach(function(body){
+      var all=[].slice.call(body.rows).filter(function(r){return r!==hr&&!(r.cells.length&&r.cells[0].tagName==='TH'&&!r.querySelector('td'));});
+      var pins=[],groups=[{head:null,rows:[]}];
+      all.forEach(function(r){
+        if(pinned(r)){pins.push(r);return;}
+        var w=0;for(var j=0;j<r.cells.length;j++)w+=r.cells[j].colSpan||1;
+        if(r.cells.length===1&&ncol>1)groups.push({head:r,rows:[]});else groups[groups.length-1].rows.push(r);
+      });
+      function cellAt(r){var x=0;for(var j=0;j<r.cells.length;j++){if(x===ci)return r.cells[j];x+=r.cells[j].colSpan||1;}return null;}
+      groups.forEach(function(g){
+        g.rows.sort(function(a,b){var A=key(cellAt(a)),B=key(cellAt(b));
+          if(!A&&!B)return 0;if(!A)return 1;if(!B)return -1;
+          if(A.n!=null&&B.n!=null)return (A.n-B.n)*m;
+          return String(A.s!=null?A.s:A.n).localeCompare(String(B.s!=null?B.s:B.n),undefined,{numeric:true})*m;});
+        if(g.head)body.appendChild(g.head);g.rows.forEach(function(r){body.appendChild(r);});
+      });
+      pins.forEach(function(r){body.appendChild(r);});
+    });
+  },false);
+})();
+
+</script><!--SORTABLE-END-->
+</body></html>
