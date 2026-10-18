@@ -45,9 +45,9 @@ tr.dim td{color:var(--muted)}th.t,td.t{text-align:left!important}
 @media(prefers-reduced-motion:reduce){.fx-in{animation:none;opacity:1}.shim{animation:none}.bar i,.chartbox rect{transition:none}.card:hover,.chartbox:hover,.pill:hover{transform:none}}
 </style></head><body>
 <div id="gate"><form onsubmit="go(event)"><h1>Total Income Tracker</h1><p class="muted">Enter password</p><input id="pw" type="password" autofocus><button>Open</button><div id="err" class="neg"></div></form></div>
-<div class="top"><div class="wrap"><h1>Total Income Tracker</h1><div class="muted">Ryan Sci · Syndications · Commissions · Trading · <span id="gen"></span></div></div></div>
+<div class="top"><div class="wrap"><h1>Total Income Tracker</h1><div class="muted">Ryan Sci · Syndications · Commissions · Trading · NNN Rent · <span id="gen"></span></div></div></div>
 <div class="wrap" id="app" style="display:none">
-<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><button class="pill" data-t="Y">By Year</button><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndications</button><button class="pill" data-t="comm">Commissions</button><button class="pill" data-t="trading">Trading</button></div>
+<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><button class="pill" data-t="Y">By Year</button><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndications</button><button class="pill" data-t="comm">Commissions</button><button class="pill" data-t="trading">Trading</button><button class="pill" data-t="nnn">NNN Rent</button></div>
 <section data-s="O"><div class="cards" id="hero"></div><h2>By Stream</h2><div class="cards" id="scards"></div>
 <div class="grid2"><div><h2>Income by Year</h2><div class="chartbox" id="cYear"></div></div><div><h2 id="hMon">Monthly</h2><div class="chartbox" id="cMon"></div></div></div>
 <h2>Summary</h2><div class="scroll" id="tOv"></div></section>
@@ -62,7 +62,7 @@ async function decrypt(pw){const e=await (await fetch('data.enc.json',{cache:'no
  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(e.salt),iterations:e.iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},key,b64(e.ct))));}
 const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','No month'];
-const COL={ryansci:'#38bdf8',synd:'#e8b923',comm:'#a78bfa',trading:'#f97316'};
+const COL={ryansci:'#38bdf8',synd:'#e8b923',comm:'#a78bfa',trading:'#f97316',nnn:'#f472b6'};
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const r2=v=>Math.round(v*100)/100;
 const $=v=>v==null||!isFinite(v)?'—':(v<0?'-':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -92,7 +92,7 @@ function card(l,v,s,extra,hero){return `<div class="card${hero?' hero':''}"><div
 function bar(p,c){return `<div class="bar"><i data-w="${Math.max(0,Math.min(100,p))}" style="background:${c}"></i></div>`}
 function overview(){const nm=NM(),ks=SK(),y=D.ytd,tY=D.totYear[y];
  const prin=D.comp.synd['Principal returned'];
- document.getElementById('hero').innerHTML=card(`Total income ${y} YTD`,tY,`${D.years[0]}–${y} all-time: ${$(D.totAll)}`,'',1)+card('All-time total income',D.totAll,'All four streams combined','',1)+card(`Return of principal ${y} (not income)`,prin.year[y],'Syndications · all-time '+$(sum(Object.values(prin.year))));
+ document.getElementById('hero').innerHTML=card(`Total income ${y} YTD`,tY,`${D.years[0]}–${y} all-time: ${$(D.totAll)}`,'',1)+card('All-time total income',D.totAll,`All ${D.streams.length} streams combined`,'',1)+card(`Return of principal ${y} (not income)`,prin.year[y],'Syndications · all-time '+$(sum(Object.values(prin.year))));
  const pos=ks.reduce((a,k)=>a+Math.max(0,D.byYear[k][y]||0),0);
  document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${y} YTD`,D.byYear[k][y],'All-time '+`<span class="${sg(D.allTime[k])}">${$(D.allTime[k])}</span>`,bar(pos?Math.max(0,D.byYear[k][y]||0)/pos*100:0,COL[k]))).join('');
  const yy=['2024','2025',y].filter((v,i,a)=>a.indexOf(v)==i&&D.years.includes(v));
