@@ -43,6 +43,7 @@ tr.dim td{color:var(--muted)}th.t,td.t{text-align:left!important}
 .bar{height:6px;background:#262626;border-radius:9px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;width:0;border-radius:9px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
 .chartbox rect{transition:y .9s cubic-bezier(.2,.8,.2,1),height .9s cubic-bezier(.2,.8,.2,1)}
 @media(prefers-reduced-motion:reduce){.fx-in{animation:none;opacity:1}.shim{animation:none}.bar i,.chartbox rect{transition:none}.card:hover,.chartbox:hover,.pill:hover{transform:none}}
+.yfc{margin:0 0 8px}.yfc .pill{padding:4px 12px;font-size:12px}
 </style></head><body>
 <div id="gate"><form onsubmit="go(event)"><h1>Total Income Tracker</h1><p class="muted">Enter password</p><input id="pw" type="password" autofocus><button>Open</button><div id="err" class="neg"></div></form></div>
 <div class="top"><div class="wrap"><h1>Total Income Tracker</h1><div class="muted">Ryan Sci · Syndications · Commissions · Trading · NNN Rent · <span id="gen"></span></div></div></div>
@@ -70,7 +71,21 @@ const $k=v=>(v<0?'-':'')+'$'+(Math.abs(v)>=1e6?(Math.abs(v)/1e6).toFixed(2)+'M':
 const sg=v=>v==null?'':v>0?'pos':v<0?'neg':'';
 const M=v=>({v:$(v),c:sg(v),d:v});
 const cell=c=>{if(c&&typeof c=='object')return `<td class="${c.c||''}"${c.d!=null&&isFinite(c.d)?` data-v="${c.d}"`:''}>${c.v}</td>`;return `<td>${c??''}</td>`};
-function tbl(id,h,rows,foot,rc){const tx=h.map((_,j)=>rows.length&&rows.every(r=>!(r[j]&&typeof r[j]=='object')));const ce=(c,j)=>tx[j]?`<td class="t">${c??''}</td>`:cell(c);document.getElementById(id).innerHTML='<table><thead><tr>'+h.map((x,j)=>`<th class="${tx[j]?'t':''}">${x}</th>`).join('')+'</tr></thead><tbody>'+rows.map((r,i)=>`<tr class="${rc?rc(i):''}">`+r.map(ce).join('')+'</tr>').join('')+'</tbody>'+(foot?'<tfoot><tr class="ft">'+foot.map(ce).join('')+'</tr></tfoot>':'')+'</table>';}
+/* year-filter chips: added before any table with a Year / Date column; filters rows + recalculates TOTAL money cells */
+function yf(id){const box=document.getElementById(id);const prev=box.previousElementSibling;if(prev&&prev.classList.contains('yfc'))prev.remove();
+ const t=box.querySelector('table');if(!t)return;const hs=[...t.tHead.rows[0].cells].map(c=>c.textContent.trim());
+ const ci=hs.findIndex(h=>/^(year|close date|date|lease year)$/i.test(h));if(ci<0)return;
+ const rows=[...t.tBodies[0].rows],yr=r=>{const m=(r.cells[ci]?.textContent||'').match(/\b(19|20)\d\d\b/);return m?m[0]:'Other'};
+ const ys=[...new Set(rows.map(yr))].sort();if(ys.length<2)return;
+ const ft=t.tFoot&&t.tFoot.rows[0],orig=ft?[...ft.cells].map(c=>[c.innerHTML,c.className]):null;
+ const bar=document.createElement('div');bar.className='pills yfc';bar.innerHTML=['All years',...ys].map((y,k)=>`<button class="pill${k?'':' on'}" data-y="${k?y:''}">${y}</button>`).join('');
+ box.parentNode.insertBefore(bar,box);
+ bar.onclick=e=>{const b=e.target.closest('.pill');if(!b)return;bar.querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x===b));const y=b.dataset.y;
+  const vis=[...t.tBodies[0].rows].filter(r=>{const ok=!y||yr(r)===y;r.style.display=ok?'':'none';return ok});
+  if(!ft)return;[...ft.cells].forEach((c,j)=>{c.innerHTML=orig[j][0];c.className=orig[j][1];if(!y)return;
+   if(j==ci){c.textContent=y;return}
+   if(/^-?\$/.test(c.textContent.trim())){const v=r2(vis.reduce((a,r)=>a+(+(r.cells[j]?.dataset.v)||0),0));c.textContent=$(v);c.className=sg(v);c.dataset.v=v}});};}
+function tbl(id,h,rows,foot,rc){const tx=h.map((_,j)=>rows.length&&rows.every(r=>!(r[j]&&typeof r[j]=='object')));const ce=(c,j)=>tx[j]?`<td class="t">${c??''}</td>`:cell(c);document.getElementById(id).innerHTML='<table><thead><tr>'+h.map((x,j)=>`<th class="${tx[j]?'t':''}">${x}</th>`).join('')+'</tr></thead><tbody>'+rows.map((r,i)=>`<tr class="${rc?rc(i):''}">`+r.map(ce).join('')+'</tr>').join('')+'</tbody>'+(foot?'<tfoot><tr class="ft">'+foot.map(ce).join('')+'</tr></tfoot>':'')+'</table>';;yf(id);}
 const sum=a=>r2(a.reduce((x,y)=>x+(y||0),0));
 let D,tab,yrM,yrS;
 const NM=()=>Object.fromEntries(D.streams);const SK=()=>D.streams.map(s=>s[0]);
