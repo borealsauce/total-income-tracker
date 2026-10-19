@@ -83,7 +83,7 @@ function yf(id){const box=document.getElementById(id);const prev=box.previousEle
  bar.onclick=e=>{const b=e.target.closest('.pill');if(!b)return;bar.querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x===b));const y=b.dataset.y;
   const vis=[...t.tBodies[0].rows].filter(r=>{const ok=!y||yr(r)===y;r.style.display=ok?'':'none';return ok});
   if(!ft)return;[...ft.cells].forEach((c,j)=>{c.innerHTML=orig[j][0];c.className=orig[j][1];if(!y)return;
-   if(j==ci){c.textContent=y;return}
+   if(j==ci&&j){c.textContent=y;return}
    if(/^-?\$/.test(c.textContent.trim())){const v=r2(vis.reduce((a,r)=>a+(+(r.cells[j]?.dataset.v)||0),0));c.textContent=$(v);c.className=sg(v);c.dataset.v=v}});};}
 function tbl(id,h,rows,foot,rc){const tx=h.map((_,j)=>rows.length&&rows.every(r=>!(r[j]&&typeof r[j]=='object')));const ce=(c,j)=>tx[j]?`<td class="t">${c??''}</td>`:cell(c);document.getElementById(id).innerHTML='<table><thead><tr>'+h.map((x,j)=>`<th class="${tx[j]?'t':''}">${x}</th>`).join('')+'</tr></thead><tbody>'+rows.map((r,i)=>`<tr class="${rc?rc(i):''}">`+r.map(ce).join('')+'</tr>').join('')+'</tbody>'+(foot?'<tfoot><tr class="ft">'+foot.map(ce).join('')+'</tr></tfoot>':'')+'</table>';;yf(id);}
 const sum=a=>r2(a.reduce((x,y)=>x+(y||0),0));
