@@ -75,7 +75,7 @@ const cell=c=>{if(c&&typeof c=='object')return `<td class="${c.c||''}"${c.d!=nul
 function yf(id){const box=document.getElementById(id);const prev=box.previousElementSibling;if(prev&&prev.classList.contains('yfc'))prev.remove();
  const t=box.querySelector('table');if(!t)return;const hs=[...t.tHead.rows[0].cells].map(c=>c.textContent.trim());
  const ci=hs.findIndex(h=>/^(year|close date|date|lease year)$/i.test(h));if(ci<0)return;
- const rows=[...t.tBodies[0].rows],yr=r=>{const m=(r.cells[ci]?.textContent||'').match(/\b(19|20)\d\d\b/);return m?m[0]:'Other'};
+ const rows=[...t.tBodies[0].rows],yr=r=>{const m=(r.cells[ci]?.textContent||'').match(/\b(19|20)\d\d\b/);return m?m[0]:'Undated'};
  const ys=[...new Set(rows.map(yr))].sort();if(ys.length<2)return;
  const ft=t.tFoot&&t.tFoot.rows[0],orig=ft?[...ft.cells].map(c=>[c.innerHTML,c.className]):null;
  const bar=document.createElement('div');bar.className='pills yfc';bar.innerHTML=['All years',...ys].map((y,k)=>`<button class="pill${k?'':' on'}" data-y="${k?y:''}">${y}</button>`).join('');
