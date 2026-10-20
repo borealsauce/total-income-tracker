@@ -112,14 +112,14 @@ function reCard(S){const r=D.reproj;if(!r)return'';const on=S===r.year;const k=v
 function overview(){const nm=NM(),ks=SK(),y=D.ytd,S=SEL,prin=D.comp.synd['Principal returned'];
  const lab=Y=>Y+(Y==y?' YTD':'');
  if(S){const tS=D.totYear[S]||0,pos=ks.reduce((a,k)=>a+Math.max(0,D.byYear[k][S]||0),0);
-  document.getElementById('hero').innerHTML=card(`Total income ${lab(S)}`,tS,`All ${D.streams.length} streams combined · ${S} only`,'',1)+card(`Return of principal ${S} (not income)`,prin.year[S],'Syndication Income')+reCard(S);
+  document.getElementById('hero').innerHTML=card(`Total income ${lab(S)}`,tS,`All ${D.streams.length} streams combined · ${S} only`,'',1)+reCard(S);
   document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${lab(S)}`,D.byYear[k][S],tS?((D.byYear[k][S]||0)/tS*100).toFixed(1)+'% of '+S:'',bar(pos?Math.max(0,D.byYear[k][S]||0)/pos*100:0,COL[k]))).join('');
   stacked('cYear',[{label:lab(S),vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][S]]))}],ks,COL,nm);
   document.getElementById('hMon').textContent=`Monthly ${S}`;
   stacked('cMon',(D.mgrid[S]||[]).map((g,i)=>({label:i<12?MO[i]:'No mo.',vals:g})).filter((o,i)=>i<12||Object.values(o.vals).some(v=>v)),ks,COL,nm);
   tbl('tOv',['Stream',lab(S),'Share of '+S],ks.map(k=>[`<span class="dot" style="background:${COL[k]}"></span>${nm[k]}`,M(D.byYear[k][S]),{v:tS?((D.byYear[k][S]||0)/tS*100).toFixed(1)+'%':'—',d:tS?(D.byYear[k][S]||0)/tS*100:0}]),['TOTAL',M(tS),'100.0%']);return;}
  const tY=D.totYear[y];
- document.getElementById('hero').innerHTML=card('All-time total income',D.totAll,`${D.years[0]}–${y}, all ${D.streams.length} streams combined`,'',1)+card(`Total income ${y} YTD`,tY,'','',1)+card('Return of principal all-time (not income)',sum(Object.values(prin.year)),'Syndication Income')+reCard(null);
+ document.getElementById('hero').innerHTML=card('All-time total income',D.totAll,`${D.years[0]}–${y}, all ${D.streams.length} streams combined`,'',1)+card(`Total income ${y} YTD`,tY,'','',1)+reCard(null);
  const pos=ks.reduce((a,k)=>a+Math.max(0,D.allTime[k]||0),0);
  document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · All-time`,D.allTime[k],`${y} YTD <span class="${sg(D.byYear[k][y])}">${$(D.byYear[k][y])}</span>`,bar(pos?Math.max(0,D.allTime[k]||0)/pos*100:0,COL[k]))).join('');
  stacked('cYear',D.years.map(Y=>({label:Y,vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][Y]]))})),ks,COL,nm);
