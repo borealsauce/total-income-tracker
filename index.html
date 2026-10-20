@@ -43,17 +43,18 @@ tr.dim td{color:var(--muted)}th.t,td.t{text-align:left!important}
 .bar{height:6px;background:#262626;border-radius:9px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;width:0;border-radius:9px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
 .chartbox rect{transition:y .9s cubic-bezier(.2,.8,.2,1),height .9s cubic-bezier(.2,.8,.2,1)}
 @media(prefers-reduced-motion:reduce){.fx-in{animation:none;opacity:1}.shim{animation:none}.bar i,.chartbox rect{transition:none}.card:hover,.chartbox:hover,.pill:hover{transform:none}}
+.ydd{position:relative;display:inline-block}.ydd .menu{display:none;position:absolute;left:0;top:100%;z-index:50;background:#141414;border:1px solid #333;border-radius:10px;padding:6px;min-width:150px;box-shadow:0 8px 24px #0009}.ydd:hover .menu,.ydd.open .menu{display:block}.ydd .menu button{display:block;width:100%;text-align:left;background:none;border:0;color:#f5f5f5;padding:7px 10px;border-radius:6px;cursor:pointer;font:inherit}.ydd .menu button:hover,.ydd .menu button.on{background:#262626;color:#f5c518}
 .yfc{margin:0 0 8px}.yfc .pill{padding:4px 12px;font-size:12px}
 </style></head><body>
 <div id="gate"><form onsubmit="go(event)"><h1>Total Income Tracker</h1><p class="muted">Enter password</p><input id="pw" type="password" autofocus><button>Open</button><div id="err" class="neg"></div></form></div>
 <div class="top"><div class="wrap"><h1>Total Income Tracker</h1><div class="muted">Ryan Sci · Syndication Income · Brokering / Raise Commission Income · Trading &amp; Dividend Income · NNN Rent · Savings Interest · <span id="gen"></span></div></div></div>
 <div class="wrap" id="app" style="display:none">
-<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><button class="pill" data-t="Y">By Year</button><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndication Income</button><button class="pill" data-t="comm">Brokering / Raise Commission Income</button><button class="pill" data-t="trading">Trading &amp; Dividend Income</button><button class="pill" data-t="nnn">NNN Rent (net)</button><button class="pill" data-t="savings">Savings Interest</button></div>
+<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><span class="ydd" id="ydd"><button class="pill" id="ybtn" type="button">All Years</button><button class="pill" id="ycar" type="button" aria-label="Pick a year" style="padding:6px 8px;margin-left:-4px">▾</button><div class="menu" id="ymenu"></div></span><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndication Income</button><button class="pill" data-t="comm">Brokering / Raise Commission Income</button><button class="pill" data-t="trading">Trading &amp; Dividend Income</button><button class="pill" data-t="nnn">NNN Rent (net)</button><button class="pill" data-t="savings">Savings Interest</button></div>
 <section data-s="O"><div class="cards" id="hero"></div><h2>By Stream</h2><div class="cards" id="scards"></div>
 <div class="grid2"><div><h2>Income by Year</h2><div class="chartbox" id="cYear"></div></div><div><h2 id="hMon">Monthly</h2><div class="chartbox" id="cMon"></div></div></div>
 <h2>Summary</h2><div class="scroll" id="tOv"></div></section>
 <section data-s="M"><h2>Income by Month</h2><div class="pills yrs" id="yM"></div><div class="chartbox" id="cM"></div><div class="scroll" style="margin-top:12px" id="tM"></div></section>
-<section data-s="Y"><h2>Income by Year</h2><div class="chartbox" id="cY"></div><div class="scroll" style="margin-top:12px" id="tY"></div></section>
+<section data-s="Y" style="display:none"><h2>Income by Year · All Years</h2><div class="chartbox" id="cY"></div><div class="scroll" style="margin-top:12px" id="tY"></div></section>
 <section data-s="S"><div class="cards" id="stCards"></div><h2>By Year</h2><div class="scroll" id="tSY"></div><h2 id="hSM">By Month</h2><div class="pills yrs" id="ySM"></div><div class="scroll" id="tSM"></div><div id="extra"></div></section>
 <br></div>
 <script>
@@ -76,18 +77,19 @@ function yf(id){const box=document.getElementById(id);const prev=box.previousEle
  const t=box.querySelector('table');if(!t)return;const hs=[...t.tHead.rows[0].cells].map(c=>c.textContent.trim());
  const ci=hs.findIndex(h=>/^(year|close date|date|lease year)$/i.test(h));if(ci<0)return;
  const rows=[...t.tBodies[0].rows],yr=r=>{const m=(r.cells[ci]?.textContent||'').match(/\b(19|20)\d\d\b/);return m?m[0]:'Undated'};
- const ys=[...new Set(rows.map(yr))].sort();if(ys.length<2)return;
+ const ys=[...new Set(rows.map(yr))].sort();if(ys.length<2&&!(SEL&&ys[0]!==SEL))return;
  const ft=t.tFoot&&t.tFoot.rows[0],orig=ft?[...ft.cells].map(c=>[c.innerHTML,c.className]):null;
  const bar=document.createElement('div');bar.className='pills yfc';bar.innerHTML=['All years',...ys].map((y,k)=>`<button class="pill${k?'':' on'}" data-y="${k?y:''}">${y}</button>`).join('');
  box.parentNode.insertBefore(bar,box);
- bar.onclick=e=>{const b=e.target.closest('.pill');if(!b)return;bar.querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x===b));const y=b.dataset.y;
+ const apply=y=>{bar.querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x.dataset.y===y));
   const vis=[...t.tBodies[0].rows].filter(r=>{const ok=!y||yr(r)===y;r.style.display=ok?'':'none';return ok});
   if(!ft)return;[...ft.cells].forEach((c,j)=>{c.innerHTML=orig[j][0];c.className=orig[j][1];if(!y)return;
    if(j==ci&&j){c.textContent=y;return}
-   if(/^-?\$/.test(c.textContent.trim())){const v=r2(vis.reduce((a,r)=>a+(+(r.cells[j]?.dataset.v)||0),0));c.textContent=$(v);c.className=sg(v);c.dataset.v=v}});};}
+   if(/^-?\$/.test(c.textContent.trim())){const v=r2(vis.reduce((a,r)=>a+(+(r.cells[j]?.dataset.v)||0),0));c.textContent=$(v);c.className=sg(v);c.dataset.v=v}});};
+ bar.onclick=e=>{const b=e.target.closest('.pill');if(b)apply(b.dataset.y)};if(SEL)apply(SEL);}
 function tbl(id,h,rows,foot,rc){const tx=h.map((_,j)=>rows.length&&rows.every(r=>!(r[j]&&typeof r[j]=='object')));const ce=(c,j)=>tx[j]?`<td class="t">${c??''}</td>`:cell(c);document.getElementById(id).innerHTML='<table><thead><tr>'+h.map((x,j)=>`<th class="${tx[j]?'t':''}">${x}</th>`).join('')+'</tr></thead><tbody>'+rows.map((r,i)=>`<tr class="${rc?rc(i):''}">`+r.map(ce).join('')+'</tr>').join('')+'</tbody>'+(foot?'<tfoot><tr class="ft">'+foot.map(ce).join('')+'</tr></tfoot>':'')+'</table>';;yf(id);}
 const sum=a=>r2(a.reduce((x,y)=>x+(y||0),0));
-let D,tab,yrM,yrS;
+let D,tab,yrM,yrS,SEL='';
 const NM=()=>Object.fromEntries(D.streams);const SK=()=>D.streams.map(s=>s[0]);
 /* stacked bar chart: groups=[{label, vals:{key:val}}], keys, colors */
 function stacked(id,groups,keys,colors,names){const W=900,Hh=280,P=46;let mx=0,mn=0;
@@ -105,18 +107,25 @@ function yearPills(id,cur,years){document.getElementById(id).innerHTML=years.map
 function monthsFor(grid){return grid.map((g,i)=>({i,g})).filter(o=>Object.values(o.g).some(v=>v!=null))}
 function card(l,v,s,extra,hero){return `<div class="card${hero?' hero':''}"><div class="l">${l}</div><div class="v ${sg(v)}">${$(v)}</div>${s?`<div class="s">${s}</div>`:''}${extra||''}</div>`}
 function bar(p,c){return `<div class="bar"><i data-w="${Math.max(0,Math.min(100,p))}" style="background:${c}"></i></div>`}
-function overview(){const nm=NM(),ks=SK(),y=D.ytd,tY=D.totYear[y];
- const prin=D.comp.synd['Principal returned'];
- document.getElementById('hero').innerHTML=card(`Total income ${y} YTD`,tY,`${D.years[0]}–${y} all-time: ${$(D.totAll)}`,'',1)+card('All-time total income',D.totAll,`All ${D.streams.length} streams combined`,'',1)+card(`Return of principal ${y} (not income)`,prin.year[y],'Syndication Income · all-time '+$(sum(Object.values(prin.year))));
- const pos=ks.reduce((a,k)=>a+Math.max(0,D.byYear[k][y]||0),0);
- document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${y} YTD`,D.byYear[k][y],'All-time '+`<span class="${sg(D.allTime[k])}">${$(D.allTime[k])}</span>`,bar(pos?Math.max(0,D.byYear[k][y]||0)/pos*100:0,COL[k]))).join('');
- const yy=['2024','2025',y].filter((v,i,a)=>a.indexOf(v)==i&&D.years.includes(v));
- stacked('cYear',yy.map(Y=>({label:Y+(Y==y?' YTD':''),vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][Y]]))})),ks,COL,nm);
+function overview(){const nm=NM(),ks=SK(),y=D.ytd,S=SEL,prin=D.comp.synd['Principal returned'];
+ const lab=Y=>Y+(Y==y?' YTD':'');
+ if(S){const tS=D.totYear[S]||0,pos=ks.reduce((a,k)=>a+Math.max(0,D.byYear[k][S]||0),0);
+  document.getElementById('hero').innerHTML=card(`Total income ${lab(S)}`,tS,`All ${D.streams.length} streams combined · ${S} only`,'',1)+card(`Return of principal ${S} (not income)`,prin.year[S],'Syndication Income');
+  document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${lab(S)}`,D.byYear[k][S],tS?((D.byYear[k][S]||0)/tS*100).toFixed(1)+'% of '+S:'',bar(pos?Math.max(0,D.byYear[k][S]||0)/pos*100:0,COL[k]))).join('');
+  stacked('cYear',[{label:lab(S),vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][S]]))}],ks,COL,nm);
+  document.getElementById('hMon').textContent=`Monthly ${S}`;
+  stacked('cMon',(D.mgrid[S]||[]).map((g,i)=>({label:i<12?MO[i]:'No mo.',vals:g})).filter((o,i)=>i<12||Object.values(o.vals).some(v=>v)),ks,COL,nm);
+  tbl('tOv',['Stream',lab(S),'Share of '+S],ks.map(k=>[`<span class="dot" style="background:${COL[k]}"></span>${nm[k]}`,M(D.byYear[k][S]),{v:tS?((D.byYear[k][S]||0)/tS*100).toFixed(1)+'%':'—',d:tS?(D.byYear[k][S]||0)/tS*100:0}]),['TOTAL',M(tS),'100.0%']);return;}
+ const tY=D.totYear[y];
+ document.getElementById('hero').innerHTML=card('All-time total income',D.totAll,`${D.years[0]}–${y}, all ${D.streams.length} streams combined`,'',1)+card(`Total income ${y} YTD`,tY,'','',1)+card('Return of principal all-time (not income)',sum(Object.values(prin.year)),'Syndication Income');
+ const pos=ks.reduce((a,k)=>a+Math.max(0,D.allTime[k]||0),0);
+ document.getElementById('scards').innerHTML=ks.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · All-time`,D.allTime[k],`${y} YTD <span class="${sg(D.byYear[k][y])}">${$(D.byYear[k][y])}</span>`,bar(pos?Math.max(0,D.allTime[k]||0)/pos*100:0,COL[k]))).join('');
+ stacked('cYear',D.years.map(Y=>({label:Y,vals:Object.fromEntries(ks.map(k=>[k,D.byYear[k][Y]]))})),ks,COL,nm);
  document.getElementById('hMon').textContent=`Monthly ${y}`;
  stacked('cMon',D.mgrid[y].map((g,i)=>({label:i<12?MO[i]:'No mo.',vals:g})).filter((o,i)=>i<12||Object.values(o.vals).some(v=>v)),ks,COL,nm);
  tbl('tOv',['Stream','2024','2025',y+' YTD','All-time','Share of all-time'],ks.map(k=>[`<span class="dot" style="background:${COL[k]}"></span>${nm[k]}`,M(D.byYear[k]['2024']),M(D.byYear[k]['2025']),M(D.byYear[k][y]),M(D.allTime[k]),{v:(D.allTime[k]/D.totAll*100).toFixed(1)+'%',d:D.allTime[k]/D.totAll*100,c:sg(D.allTime[k])}]),['TOTAL',M(D.totYear['2024']),M(D.totYear['2025']),M(tY),M(D.totAll),'100.0%']);}
-function byMonth(){const nm=NM(),ks=SK(),yrs=D.years.filter(Y=>monthsFor(D.mgrid[Y]).length);if(!yrs.includes(yrM))yrM=D.ytd;yearPills('yM',yrM,yrs);
- const g=D.mgrid[yrM],rows=monthsFor(g);
+function byMonth(){const nm=NM(),ks=SK(),yrs=D.years.filter(Y=>monthsFor(D.mgrid[Y]).length);if(SEL)yrM=SEL;if(!yrs.includes(yrM))yrM=D.ytd;yearPills('yM',yrM,yrs);
+ const g=D.mgrid[yrM]||[],rows=monthsFor(g);
  stacked('cM',rows.map(o=>({label:o.i<12?MO[o.i]:'No mo.',vals:o.g})),ks,COL,nm);
  tbl('tM',['Month',...ks.map(k=>nm[k]),'Total'],rows.map(o=>[{v:o.i<12?MO[o.i]+' '+yrM:'No month',d:o.i<12?null:null},...ks.map(k=>M(o.g[k])),M(sum(ks.map(k=>o.g[k])))]),['TOTAL '+yrM,...ks.map(k=>M(D.byYear[k][yrM])),M(D.totYear[yrM])]);
  document.querySelectorAll('#tM tbody tr').forEach((r,i)=>{if(rows[i].i<12)r.cells[0].dataset.v=new Date(Date.UTC(+yrM,rows[i].i,1)).getTime();else r.cells[0].dataset.v=Date.UTC(+yrM,12,1)})}
@@ -125,9 +134,9 @@ function byYear(){const nm=NM(),ks=SK();
  const rows=D.years.map(Y=>[Y+(Y==D.ytd?' YTD':''),...ks.map(k=>M(D.byYear[k][Y])),M(D.totYear[Y])]);
  if(ks.some(k=>D.undated[k]!=null))rows.push(['Undated',...ks.map(k=>M(D.undated[k])),M(sum(ks.map(k=>D.undated[k])))]);
  tbl('tY',['Year',...ks.map(k=>nm[k]),'Total'],rows,['ALL-TIME',...ks.map(k=>M(D.allTime[k])),M(D.totAll)]);}
-function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=D.ytd,inc=cs.filter(c=>C[c].counted),ex=cs.filter(c=>!C[c].counted);
+function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=SEL||D.ytd,inc=cs.filter(c=>C[c].counted),ex=cs.filter(c=>!C[c].counted);
  const allc=c=>sum([...Object.values(C[c].year),C[c].undated]);
- document.getElementById('stCards').innerHTML=card(`${nm[k]}${/income$/i.test(nm[k])?'':' income'} ${y} YTD`,D.byYear[k][y],'',bar(100,COL[k]),1)+card(`${nm[k]} all-time${/income$/i.test(nm[k])?'':' income'}`,D.allTime[k],'','',1)+inc.concat(ex).map(c=>card(c+(C[c].counted?'':' (not income)')+` · ${y}`,C[c].year[y],'All-time '+$(allc(c)))).join('');
+ document.getElementById('stCards').innerHTML=card(`${nm[k]}${/income$/i.test(nm[k])?'':' income'} ${y}${y==D.ytd?' YTD':''}`,D.byYear[k][y],'',bar(100,COL[k]),1)+(SEL?'':card(`${nm[k]} all-time${/income$/i.test(nm[k])?'':' income'}`,D.allTime[k],'','',1))+inc.concat(ex).map(c=>card(c+(C[c].counted?'':' (not income)')+` · ${y}`,C[c].year[y],'All-time '+$(allc(c)))).join('');
  const yrs=D.years.filter(Y=>cs.some(c=>C[c].year[Y]!=null));
  const hdr=['Year',...inc,...(inc.length>1?['Income total']:[]),...ex.map(c=>c+' (not income)')];
  const row=(lab,get)=>[lab,...inc.map(c=>M(get(c))),...(inc.length>1?[M(inc.every(c=>get(c)==null)?null:sum(inc.map(get)))]:[]),...ex.map(c=>M(get(c)))];
@@ -136,7 +145,7 @@ function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=D.ytd,inc=cs.fi
  tbl('tSY',hdr,rows,row('ALL-TIME',allc));
  const CM=D.cmonth[k],myrs=D.years.filter(Y=>CM[Y]&&CM[Y].slice(0,12).some(g=>Object.values(g).some(v=>v!=null)));
  document.getElementById('hSM').style.display=document.getElementById('ySM').style.display=document.getElementById('tSM').style.display=myrs.length?'':'none';
- if(myrs.length){if(!myrs.includes(yrS))yrS=myrs.includes(y)?y:myrs[myrs.length-1];yearPills('ySM',yrS,myrs);
+ if(myrs.length){if(SEL)yrS=SEL;if(!myrs.includes(yrS))yrS=myrs.includes(y)?y:myrs[myrs.length-1];yearPills('ySM',yrS,myrs);
   const g=CM[yrS],mr=g.map((x,i)=>({i,x})).filter(o=>Object.values(o.x).some(v=>v!=null));
   tbl('tSM',['Month',...inc,...(inc.length>1?['Income total']:[]),...ex.map(c=>c+' (not income)')],mr.map(o=>row(o.i<12?MO[o.i]+' '+yrS:'No month',c=>o.x[c])),row('TOTAL '+yrS,c=>C[c].year[yrS]));
   document.querySelectorAll('#tSM tbody tr').forEach((r,i)=>r.cells[0].dataset.v=Date.UTC(+yrS,mr[i].i,1));}
@@ -154,15 +163,20 @@ function fx(){const vis=[...document.querySelectorAll('#app section')].filter(s=
  vis.forEach(s=>s.querySelectorAll('.card.hero .v').forEach(e=>e.classList.add('shim')));
  vis.forEach(s=>s.querySelectorAll('td:not(.t),.card .v').forEach(e=>{if(e.children.length==0)countUp(e)}));
  setTimeout(()=>document.querySelectorAll('.bar i').forEach(i=>i.style.width=i.dataset.w+'%'),RM?0:300);}
-function view(t){tab=t;localStorage.titab=t;document.querySelectorAll('#tabs .pill').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+function ymenu(){document.getElementById('ybtn').textContent=SEL?SEL:'All Years';document.getElementById('ybtn').classList.toggle('on',!!SEL||tab=='Y');document.getElementById('ymenu').innerHTML=[...D.years].reverse().map(Y=>[Y,Y]).map(([v,l])=>`<button type="button" data-yy="${v}" class="${v===SEL?'on':''}">${l}</button>`).join('')}
+function view(t){if(t=='Y')SEL='';else if(!SEL)SEL=D.ytd;tab=t;localStorage.titab=t;ymenu();document.querySelectorAll('#tabs .pill[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
  const s=['O','M','Y'].includes(t)?t:'S';document.querySelectorAll('section[data-s]').forEach(x=>x.style.display=x.dataset.s===s?'':'none');
  if(t=='O')overview();else if(t=='M')byMonth();else if(t=='Y')byYear();else stream(t);fx();}
-document.addEventListener('click',e=>{const b=e.target.closest('#tabs .pill');if(b)view(b.dataset.t);
- const y=e.target.closest('#yM .pill');if(y){yrM=localStorage.tiyrM=y.dataset.y;byMonth();fx()}
- const z=e.target.closest('#ySM .pill');if(z){yrS=z.dataset.y;stream(tab);fx()}});
+document.addEventListener('click',e=>{const dd=document.getElementById('ydd');if(e.target.closest('#ycar')){dd.classList.toggle('open');return}
+ if(e.target.closest('#ybtn')){dd.classList.remove('open');view('Y');return}
+ const o=e.target.closest('#ymenu button');if(o){SEL=o.dataset.yy;dd.classList.remove('open');view(tab=='Y'?'O':tab);return}
+ if(dd&&!e.target.closest('#ydd'))dd.classList.remove('open');
+ const b=e.target.closest('#tabs .pill[data-t]');if(b)view(b.dataset.t);
+ const y=e.target.closest('#yM .pill');if(y){SEL=y.dataset.y;view(tab)}
+ const z=e.target.closest('#ySM .pill');if(z){SEL=z.dataset.y;view(tab)}});
 async function go(e){e.preventDefault();try{const pw=document.getElementById('pw').value;D=await decrypt(pw);sessionStorage.tipw=pw;}catch(x){document.getElementById('err').textContent='Wrong password';return;}
  document.getElementById('gate').remove();document.getElementById('app').style.display='';document.getElementById('gen').textContent='Updated '+D.generated;
- yrM=localStorage.tiyrM||D.ytd;let t=localStorage.titab||'O';if(!document.querySelector(`#tabs [data-t="${t}"]`))t='O';view(t);}
+ SEL=D.ytd;yrM=D.ytd;let t=localStorage.titab||'O';if(t=='Y'||!document.querySelector(`#tabs [data-t="${t}"]`))t='O';SEL=D.ytd;view(t);}
 if(sessionStorage.tipw){document.getElementById('pw').value=sessionStorage.tipw;go(new Event('submit'));}
 </script><!--SORTABLE-START--><script>
 /* Shared sortable tables (Grok Bot trackers). Click any header: asc/desc toggle with ▲/▼.
