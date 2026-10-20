@@ -127,7 +127,7 @@ function byYear(){const nm=NM(),ks=SK();
  tbl('tY',['Year',...ks.map(k=>nm[k]),'Total'],rows,['ALL-TIME',...ks.map(k=>M(D.allTime[k])),M(D.totAll)]);}
 function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=D.ytd,inc=cs.filter(c=>C[c].counted),ex=cs.filter(c=>!C[c].counted);
  const allc=c=>sum([...Object.values(C[c].year),C[c].undated]);
- document.getElementById('stCards').innerHTML=card(`${nm[k]} income ${y} YTD`,D.byYear[k][y],'',bar(100,COL[k]),1)+card(`${nm[k]} all-time income`,D.allTime[k],'','',1)+inc.concat(ex).map(c=>card(c+(C[c].counted?'':' (not income)')+` · ${y}`,C[c].year[y],'All-time '+$(allc(c)))).join('');
+ document.getElementById('stCards').innerHTML=card(`${nm[k]}${/income$/i.test(nm[k])?'':' income'} ${y} YTD`,D.byYear[k][y],'',bar(100,COL[k]),1)+card(`${nm[k]} all-time${/income$/i.test(nm[k])?'':' income'}`,D.allTime[k],'','',1)+inc.concat(ex).map(c=>card(c+(C[c].counted?'':' (not income)')+` · ${y}`,C[c].year[y],'All-time '+$(allc(c)))).join('');
  const yrs=D.years.filter(Y=>cs.some(c=>C[c].year[Y]!=null));
  const hdr=['Year',...inc,...(inc.length>1?['Income total']:[]),...ex.map(c=>c+' (not income)')];
  const row=(lab,get)=>[lab,...inc.map(c=>M(get(c))),...(inc.length>1?[M(inc.every(c=>get(c)==null)?null:sum(inc.map(get)))]:[]),...ex.map(c=>M(get(c)))];
