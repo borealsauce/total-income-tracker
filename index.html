@@ -108,7 +108,7 @@ function monthsFor(grid){return grid.map((g,i)=>({i,g})).filter(o=>Object.values
 function card(l,v,s,extra,hero){return `<div class="card${hero?' hero':''}"><div class="l">${l}</div><div class="v ${sg(v)}">${$(v)}</div>${s?`<div class="s">${s}</div>`:''}${extra||''}</div>`}
 function bar(p,c){return `<div class="bar"><i data-w="${Math.max(0,Math.min(100,p))}" style="background:${c}"></i></div>`}
 function reCard(S){const r=D.reproj;if(!r)return'';const on=S===r.year;const k=v=>'$'+Math.round(v/1000)+'K';
- return `<div class="card hero${on?'':' reoff'}" title="${on?'':'Only applies to '+r.year}"><div class="l">Projected ${r.year} Real Estate Income</div><div class="v">${$(r.total)}</div><div class="s">NNN net ${'$'+Math.round(r.nnn).toLocaleString('en-US')} · Syndication pace ${k(r.synd)}</div><div class="s">${on?'at current pace':'only for '+r.year+' view'}</div></div>`}
+ return `<div class="card hero${on?'':' reoff'}" title="${on?'':'Only applies to '+r.year}"><div class="l">Projected ${r.year} Total Income</div><div class="v">${$(r.allProj)}</div><div class="s">${k(r.allYtd)} YTD · ${on?'at current pace':'only for '+r.year+' view'}</div></div></div>`}
 function overview(){const nm=NM(),ks=SK(),y=D.ytd,S=SEL,prin=D.comp.synd['Principal returned'];
  const lab=Y=>Y+(Y==y?' YTD':'');
  if(S){const tS=D.totYear[S]||0,pos=ks.reduce((a,k)=>a+Math.max(0,D.byYear[k][S]||0),0);
