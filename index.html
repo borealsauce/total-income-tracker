@@ -49,7 +49,7 @@ tr.dim td{color:var(--muted)}th.t,td.t{text-align:left!important}
 <div id="gate"><form onsubmit="go(event)"><h1>Total Income Tracker</h1><p class="muted">Enter password</p><input id="pw" type="password" autofocus><button>Open</button><div id="err" class="neg"></div></form></div>
 <div class="top"><div class="wrap"><h1>Total Income Tracker</h1><div class="muted">Ryan Sci · Syndication Income · Brokering / Raise Commission Income · Trading &amp; Dividend Income · NNN Rent · Savings Interest · <span id="gen"></span></div></div></div>
 <div class="wrap" id="app" style="display:none">
-<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><span class="ydd" id="ydd"><button class="pill" id="ybtn" type="button">All Years</button><button class="pill" id="ycar" type="button" aria-label="Pick a year" style="padding:6px 8px;margin-left:-4px">▾</button><div class="menu" id="ymenu"></div></span><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndication Income</button><button class="pill" data-t="comm">Brokering / Raise Commission Income</button><button class="pill" data-t="trading">Trading &amp; Dividend Income</button><button class="pill" data-t="nnn">NNN Rent (net)</button><button class="pill" data-t="savings">Savings Interest</button></div>
+<div class="pills" id="tabs" style="margin-top:16px"><button class="pill" data-t="O">Overview</button><button class="pill" data-t="M">By Month</button><span class="ydd" id="ydd"><button class="pill" id="ybtn" type="button">All Years</button><button class="pill" id="ycar" type="button" aria-label="Pick a year" style="padding:6px 8px;margin-left:-4px">▾</button><div class="menu" id="ymenu"></div></span><button class="pill" data-t="re" id="reBtn" style="border-color:#2dd4bf">🏢 Real Estate (NNN + Syndication)</button><button class="pill" data-t="ryansci">Ryan Sci</button><button class="pill" data-t="synd">Syndication Income</button><button class="pill" data-t="comm">Brokering / Raise Commission Income</button><button class="pill" data-t="trading">Trading &amp; Dividend Income</button><button class="pill" data-t="nnn">NNN Rent (net)</button><button class="pill" data-t="savings">Savings Interest</button></div>
 <section data-s="O"><div class="cards" id="hero"></div><h2>By Stream</h2><div class="cards" id="scards"></div>
 <div class="grid2"><div><h2>Income by Year</h2><div class="chartbox" id="cYear"></div></div><div><h2 id="hMon">Monthly</h2><div class="chartbox" id="cMon"></div></div></div>
 <h2>Summary</h2><div class="scroll" id="tOv"></div></section>
@@ -64,7 +64,7 @@ async function decrypt(pw){const e=await (await fetch('data.enc.json',{cache:'no
  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(e.salt),iterations:e.iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},key,b64(e.ct))));}
 const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','No month'];
-const COL={ryansci:'#38bdf8',synd:'#e8b923',comm:'#a78bfa',trading:'#f97316',nnn:'#f472b6',savings:'#22c55e'};
+const COL={re:'#2dd4bf',ryansci:'#38bdf8',synd:'#e8b923',comm:'#a78bfa',trading:'#f97316',nnn:'#f472b6',savings:'#22c55e'};
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const r2=v=>Math.round(v*100)/100;
 const $=v=>v==null||!isFinite(v)?'—':(v<0?'-':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -158,6 +158,24 @@ function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=SEL||D.ytd,inc=
  if(k=='synd'){const P=D.synPos;tbl('tX1',['Sponsor','Position','Contributed','Pref income','Profit','Total income','Principal returned (not income)'],P.map(r=>[r[0],r[1],M(r[2]),M(r[3]),M(r[4]),M(r[5]),M(r[6])]),['TOTAL','',M(sum(P.map(r=>r[2]))),M(sum(P.map(r=>r[3]))),M(sum(P.map(r=>r[4]))),M(sum(P.map(r=>r[5]))),M(sum(P.map(r=>r[6])))])}
  if(k=='comm'){const P=D.comm;tbl('tX1',['Type','Deal','Year','Close date','Gross / raise','Commission'],P.map(r=>[r[0],r[1],r[2],r[3]||'—',M(r[4]),M(r[5])]),['TOTAL','','','',M(sum(P.map(r=>r[4]))),M(sum(P.map(r=>r[5])))]);
   const B=D.bshare;tbl('tX2',['Offering','Year','Raise','B-share commission'],B.map(r=>[r[0],r[1],{v:$(r[2]),d:r[2]},{v:$(r[3]),d:r[3]}]),['TOTAL','',{v:$(sum(B.map(r=>r[2])))},{v:$(sum(B.map(r=>r[3])))}])}}
+function realEstate(){const nm=NM(),y=SEL||D.ytd,K=['nnn','synd'],lab=Y=>Y+(Y==D.ytd?' YTD':'');
+ const v=(k,Y)=>D.byYear[k][Y],re=Y=>K.every(k=>v(k,Y)==null)?null:sum(K.map(k=>v(k,Y)));
+ const all=sum(K.map(k=>D.allTime[k])),tY=re(y)||0;
+ document.getElementById('stCards').innerHTML=card(`Real Estate income ${lab(y)}`,re(y),'NNN rent (net) + Syndication income',bar(100,'#2dd4bf'),1)+card('Real Estate income all-time',all,`${D.years[0]}–${D.ytd}`,'',1)+K.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${lab(y)}`,v(k,y),tY?((v(k,y)||0)/tY*100).toFixed(1)+'% of real estate':'',bar(tY?Math.max(0,v(k,y)||0)/tY*100:0,COL[k]))).join('');
+ const yrs=D.years.filter(Y=>re(Y)!=null);
+ const rows=yrs.map(Y=>[lab(Y),...K.map(k=>M(v(k,Y))),M(re(Y)),{v:D.totYear[Y]?(re(Y)/D.totYear[Y]*100).toFixed(1)+'%':'—',d:D.totYear[Y]?re(Y)/D.totYear[Y]*100:0}]);
+ if(K.some(k=>D.undated[k]!=null))rows.push(['Undated',...K.map(k=>M(D.undated[k])),M(sum(K.map(k=>D.undated[k]))),'—']);
+ tbl('tSY',['Year',...K.map(k=>nm[k]),'Real Estate total','Share of total income'],rows,['ALL-TIME',...K.map(k=>M(D.allTime[k])),M(all),(all/D.totAll*100).toFixed(1)+'%']);
+ const myrs=D.years.filter(Y=>monthsFor(D.mgrid[Y]).some(o=>K.some(k=>o.g[k]!=null)));
+ document.getElementById('hSM').style.display=document.getElementById('ySM').style.display=document.getElementById('tSM').style.display=myrs.length?'':'none';
+ if(myrs.length){if(SEL)yrS=SEL;if(!myrs.includes(yrS))yrS=myrs.includes(y)?y:myrs[myrs.length-1];yearPills('ySM',yrS,myrs);
+  const mr=D.mgrid[yrS].map((g,i)=>({i,g})).filter(o=>K.some(k=>o.g[k]!=null));
+  tbl('tSM',['Month',...K.map(k=>nm[k]),'Real Estate total'],mr.map(o=>[o.i<12?MO[o.i]+' '+yrS:'No month',...K.map(k=>M(o.g[k])),M(sum(K.map(k=>o.g[k])))]),['TOTAL '+yrS,...K.map(k=>M(v(k,yrS))),M(re(yrS))]);
+  document.querySelectorAll('#tSM tbody tr').forEach((r,i)=>r.cells[0].dataset.v=Date.UTC(+yrS,mr[i].i,1));}
+ const cs=[];K.forEach(k=>Object.keys(D.comp[k]).forEach(c=>{if(D.comp[k][c].counted)cs.push([k,c])}));
+ document.getElementById('extra').innerHTML='<h2>By Property / Position</h2><div class="scroll" id="tX1"></div>';
+ const cy=yrs.filter(Y=>Y!=='Undated');const ca=([k,c])=>sum([...Object.values(D.comp[k][c].year),D.comp[k][c].undated]);
+ tbl('tX1',['Line','Type',...cy.map(lab),'All-time'],cs.map(([k,c])=>[c,k=='nnn'?'NNN':'Syndication',...cy.map(Y=>M(D.comp[k][c].year[Y])),M(ca([k,c]))]),['TOTAL','',...cy.map(Y=>M(re(Y))),M(all)]);}
 function countUp(el){const t=el.textContent.trim();const m=t.match(/^(-?\$?)([\d,]+(?:\.\d+)?)(%|x)?$/);if(!m||RM)return;const fin=parseFloat(m[2].replace(/,/g,''));const dec=(m[2].split('.')[1]||'').length;const fmt=v=>m[1]+v.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec})+(m[3]||'');
  const t0=performance.now();el.textContent=fmt(0);(function f(n){const p=Math.min(1,(n-t0)/1200),e=1-Math.pow(1-p,3);el.textContent=p<1?fmt(fin*e):t;if(p<1)requestAnimationFrame(f)})(t0);}
 function fx(){const vis=[...document.querySelectorAll('#app section')].filter(s=>s.style.display!='none');
@@ -168,12 +186,12 @@ function fx(){const vis=[...document.querySelectorAll('#app section')].filter(s=
 function ymenu(){document.getElementById('ybtn').textContent=SEL?SEL:'All Years';document.getElementById('ybtn').classList.toggle('on',!!SEL||tab=='Y');document.getElementById('ymenu').innerHTML=[...D.years].reverse().map(Y=>[Y,Y]).map(([v,l])=>`<button type="button" data-yy="${v}" class="${v===SEL?'on':''}">${l}</button>`).join('')}
 function view(t){if(t=='Y')SEL='';else if(!SEL)SEL=D.ytd;tab=t;localStorage.titab=t;ymenu();document.querySelectorAll('#tabs .pill[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
  const s=['O','M','Y'].includes(t)?t:'S';document.querySelectorAll('section[data-s]').forEach(x=>x.style.display=x.dataset.s===s?'':'none');
- if(t=='O')overview();else if(t=='M')byMonth();else if(t=='Y')byYear();else stream(t);fx();}
+ if(t=='O')overview();else if(t=='M')byMonth();else if(t=='Y')byYear();else if(t=='re')realEstate();else stream(t);fx();}
 document.addEventListener('click',e=>{const dd=document.getElementById('ydd');if(e.target.closest('#ycar')){dd.classList.toggle('open');return}
  if(e.target.closest('#ybtn')){dd.classList.remove('open');view('Y');return}
  const o=e.target.closest('#ymenu button');if(o){SEL=o.dataset.yy;dd.classList.remove('open');view(tab=='Y'?'O':tab);return}
  if(dd&&!e.target.closest('#ydd'))dd.classList.remove('open');
- const b=e.target.closest('#tabs .pill[data-t]');if(b)view(b.dataset.t);
+ const b=e.target.closest('#tabs .pill[data-t]');if(b)view(b.dataset.t=='re'&&tab=='re'?'O':b.dataset.t);
  const y=e.target.closest('#yM .pill');if(y){SEL=y.dataset.y;view(tab)}
  const z=e.target.closest('#ySM .pill');if(z){SEL=z.dataset.y;view(tab)}});
 async function go(e){e.preventDefault();try{const pw=document.getElementById('pw').value;D=await decrypt(pw);sessionStorage.tipw=pw;}catch(x){document.getElementById('err').textContent='Wrong password';return;}
