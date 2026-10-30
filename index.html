@@ -161,7 +161,7 @@ function stream(k){const nm=NM(),C=D.comp[k],cs=Object.keys(C),y=SEL||D.ytd,inc=
 function realEstate(){const nm=NM(),y=SEL||D.ytd,K=['nnn','synd'],lab=Y=>Y+(Y==D.ytd?' YTD':'');
  const v=(k,Y)=>D.byYear[k][Y],re=Y=>K.every(k=>v(k,Y)==null)?null:sum(K.map(k=>v(k,Y)));
  const all=sum(K.map(k=>D.allTime[k])),tY=re(y)||0;
- document.getElementById('stCards').innerHTML=card(`Real Estate income ${lab(y)}`,re(y),'NNN rent (net) + Syndication income',bar(100,'#2dd4bf'),1)+card('Real Estate income all-time',all,`${D.years[0]}–${D.ytd}`,'',1)+K.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${lab(y)}`,v(k,y),tY?((v(k,y)||0)/tY*100).toFixed(1)+'% of real estate':'',bar(tY?Math.max(0,v(k,y)||0)/tY*100:0,COL[k]))).join('');
+ const RP=D.reP&&y=='2026'?D.reP:null;document.getElementById('stCards').innerHTML=card(`Real Estate income ${lab(y)}`,RP?RP.ytd:re(y),'NNN rent (net) + Syndication income'+(RP?' (bank deposits)':''),bar(100,'#2dd4bf'),1)+(RP?card(`Real Estate income ${y} Projected (Annual)`,RP.proj,'≈ '+$(RP.mon)+' / month · NNN '+$(RP.nnnProj)+' + Syndication '+$(RP.synd),bar(100,'#2dd4bf'),1):'')+card('Real Estate income all-time',all,`${D.years[0]}–${D.ytd}`,'',1)+K.map(k=>card(`<span class="dot" style="background:${COL[k]}"></span>${nm[k]} · ${lab(y)}`,v(k,y),tY?((v(k,y)||0)/tY*100).toFixed(1)+'% of real estate':'',bar(tY?Math.max(0,v(k,y)||0)/tY*100:0,COL[k]))).join('');
  const yrs=D.years.filter(Y=>re(Y)!=null);
  const rows=yrs.map(Y=>[lab(Y),...K.map(k=>M(v(k,Y))),M(re(Y)),{v:D.totYear[Y]?(re(Y)/D.totYear[Y]*100).toFixed(1)+'%':'—',d:D.totYear[Y]?re(Y)/D.totYear[Y]*100:0}]);
  if(K.some(k=>D.undated[k]!=null))rows.push(['Undated',...K.map(k=>M(D.undated[k])),M(sum(K.map(k=>D.undated[k]))),'—']);
